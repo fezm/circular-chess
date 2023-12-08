@@ -63,7 +63,6 @@ Before you begin, ensure you have the following installed:
   ```bash
   pip3 install pygame
 
-
 ### Controls
 
 - **Move Piece:** To move a piece, click anywhere on the space it occupies, and then click on the space where you want to move it. If the move is valid, it will be executed.
@@ -78,7 +77,7 @@ To play Circular Chess, follow these steps:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/circular-chess.git
+   git clone https://github.com/fezm/circular-chess.git
 
 2. Navigate to the project directory:
 
