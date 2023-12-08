@@ -55,7 +55,7 @@ Before you begin, ensure you have the following installed:
   ```bash
   pip3 install numpy
 
-- [Pygame] (https://www.pygame.org/): Pygame is used for creating the graphical interface of Circular Chess. Install it using:
+- [Pygame](https://www.pygame.org/): Pygame is used for creating the graphical interface of Circular Chess. Install it using:
 
   ```bash
   pip3 install pygame
