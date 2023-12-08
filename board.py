@@ -217,88 +217,11 @@ class Board:
                             Move((a, sect), (a + 1, sect - 1), self.board))
                 elif sect == 0 and self.board[a + 1][15][0] == 'w':
                     moves.append((Move((a, sect), (a + 1, 15), self.board)))
-
+                    
+    
     def get_rook_moves(self, a, sect, moves):
         enemy_color = 'b' if self.white_to_move else 'w'
-
-        def is_valid_space(ann, sec):
-            return (sec >= 0 and sec < 16) and (ann >= 0 and ann < 4)
-
-        def check_left(sec):
-            if sec == 15:
-                if self.board[a][0] == '--':
-                    moves.append(Move((a, sect), (a, 0), self.board))
-                    check_left(0)
-                    return
-                elif self.board[a][0][0] == enemy_color:
-                    moves.append(Move((a, sect), (a, 0), self.board))
-                    return
-
-            for next_sect in range(sec + 1, 16):
-                if next_sect == 15:
-                    check_left(next_sect)
-                    return
-                if self.board[a][next_sect] == '--':
-                    moves.append(Move((a, sect), (a, next_sect), self.board))
-                elif self.board[a][next_sect][0] == enemy_color:
-                    moves.append(Move((a, sect), (a, next_sect), self.board))
-                    return
-                else:
-                    return
-
-        def check_right(sec):
-            if sec == 0:
-                if self.board[a][15] == '--':
-                    moves.append(Move((a, sect), (a, 15), self.board))
-                    check_right(15)
-                    return
-                elif self.board[a][15][0] == enemy_color:
-                    moves.append(Move((a, sect), (a, 15), self.board))
-                    return
-
-            for next_sect in range(sec - 1, -1, -1):
-                if next_sect == 0:
-                    check_right(next_sect)
-                    return
-                if self.board[a][next_sect] == '--':
-                    moves.append(Move((a, sect), (a, next_sect), self.board))
-                elif self.board[a][next_sect][0] == enemy_color:
-                    moves.append(Move((a, sect), (a, next_sect), self.board))
-                    return
-                else:
-                    return
-
-        check_left(sect)
-        check_right(sect)
-
-        # check outer rings
-        for next_ann in range(a + 1, 4):
-            if not is_valid_space(next_ann, sect):
-                break
-
-            if self.board[next_ann][sect] == '--':
-                moves.append(Move((a, sect), (next_ann, sect), self.board))
-            elif self.board[next_ann][sect][0] == enemy_color:
-                moves.append(Move((a, sect), (next_ann, sect), self.board))
-                break
-            else:
-                break
-
-        # check inner rings
-        for next_ann in range(a - 1, -1, -1):
-            if not is_valid_space(next_ann, sect):
-                break
-            if self.board[next_ann][sect] == '--':
-                moves.append(Move((a, sect), (next_ann, sect), self.board))
-            elif self.board[next_ann][sect][0] == enemy_color:
-                moves.append(Move((a, sect), (next_ann, sect), self.board))
-                break
-            else:
-                break
-
-    def get_bishop_moves(self, a, sect, moves):
-        enemy_color = 'b' if self.white_to_move else 'w'
-        directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
         def is_valid_space(ann, sec):
             return (sec >= 0 and sec < 16) and (ann >= 0 and ann < 4)
@@ -316,8 +239,41 @@ class Board:
             if self.board[new_a][new_sect] == "--":
                 moves.append(Move((a, sect), (new_a, new_sect), self.board))
                 check(direction, new_a, new_sect)
+                return
             elif self.board[new_a][new_sect][0] == enemy_color:
                 moves.append(Move((a, sect), (new_a, new_sect), self.board))
+                return
+            else: 
+                return
+
+        for d in directions:
+            check(d, a, sect)
+
+    def get_bishop_moves(self, a, sect, moves):
+        enemy_color = 'b' if self.white_to_move else 'w'
+        directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+
+        def is_valid_space(ann, sec):
+            return (sec >= 0 and sec < 16) and (ann >= 0 and ann < 4)
+
+        def check(direction, ann, sec):
+            new_a = ann + direction[0]
+            new_sect = sec + direction[1]
+            if new_sect == -1:
+                new_sect = 15
+            elif new_sect == 16:
+                new_sect = 0
+            if not is_valid_space(new_a, new_sect):
+                return
+
+            if self.board[new_a][new_sect] == "--":
+                moves.append(Move((a, sect), (new_a, new_sect), self.board))
+                check(direction, new_a, new_sect)
+                return
+            elif self.board[new_a][new_sect][0] == enemy_color:
+                moves.append(Move((a, sect), (new_a, new_sect), self.board))
+                return
+            else:
                 return
 
         for d in directions:
@@ -339,7 +295,7 @@ class Board:
             new_a = ann + direction[0]
             new_sect = sec + direction[1]
             if new_sect == -1:
-                new_sect == 15
+                new_sect = 15
             elif new_sect == 16:
                 new_sect = 0
             if not is_valid_space(new_a, new_sect):
@@ -349,7 +305,7 @@ class Board:
                 moves.append(Move((a, sect), (new_a, new_sect), self.board))
             elif self.board[new_a][new_sect][0] == enemy_color:
                 moves.append(Move((a, sect), (new_a, new_sect), self.board))
-                
+            
             return
 
         for d in directions:
@@ -367,13 +323,14 @@ class Board:
             new_a = ann + direction[0]
             new_sect = sec + direction[1]
             if new_sect == -1:
-                new_sect == 15
+                new_sect = 15
             elif new_sect == 16:
                 new_sect = 0
             elif new_sect == -2:
                 new_sect = 14
             elif new_sect == 17:
                 new_sect = 1
+            
             if not is_valid_space(new_a, new_sect):
                 return
 
@@ -381,7 +338,6 @@ class Board:
                 moves.append(Move((a, sect), (new_a, new_sect), self.board))
             elif self.board[new_a][new_sect][0] == enemy_color:
                 moves.append(Move((a, sect), (new_a, new_sect), self.board))
-            return
 
         for d in directions:
             check(d, a, sect)

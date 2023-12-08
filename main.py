@@ -20,18 +20,6 @@ def load_images():
             "images/" + piece + ".png"), (PIECE_SIZE, PIECE_SIZE))
 
 
-# move this later
-"""
-Responsible for drawing the pieces. Move this into board
-"""
-
-
-def draw_game_state(window, gs):
-    # drawBoard, pretty much our draw_board
-    # drawPieces
-    pass
-
-
 def main():
     pg.init()
 
@@ -78,9 +66,10 @@ def main():
                     
                 if len(player_clicks) == 2: # after second move
                     move = Move(player_clicks[0], player_clicks[1], board.board)
-                    print(move.get_chess_notation())
                     if move in valid_moves:
                         board.make_move(move)
+                        board.move_log.append(move.get_chess_notation())
+                        print(move.get_chess_notation())
                         move_made = True
                     space_selected = ()
                     player_clicks = []
@@ -90,15 +79,9 @@ def main():
                 if event.key == pg.K_z:
                     board.undo_move()
                     move_made = True
-                    
-                
-                # if a < 0 or a > 3:
-                #     break
-                # print(f"piece: {board.board[a][sect]}")
-                
-            
 
-        clock.tick(FPS)  # move this later ?
+
+        clock.tick(FPS)
 
         # Logical udates here
         if move_made:
@@ -106,7 +89,7 @@ def main():
             move_made = False
 
         # Render the graphics here.
-        board.draw_board(WINDOW)  # move this later ?
+        board.draw_board(WINDOW)
         board.draw_pieces(WINDOW, IMAGES)
         pg.display.update()
 

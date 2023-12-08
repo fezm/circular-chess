@@ -1,5 +1,5 @@
-import pygame
 from math import pi
+
 """
 All of our constants
 """
