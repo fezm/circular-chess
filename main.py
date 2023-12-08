@@ -42,6 +42,9 @@ def main():
     WINDOW.fill(GRAY)
 
     board = Board()
+    valid_moves = board.get_valid_moves()
+    move_made = False # variable for when a move is made
+    
     load_images()
     # print(IMAGES.keys())
 
@@ -54,6 +57,8 @@ def main():
             if event.type == pg.QUIT:
                 run = False
                 break
+            
+            # mouse handler
             elif event.type == pg.MOUSEBUTTONDOWN:
                 location = pg.mouse.get_pos()  # (x, y) location of mouse
                 x = location[0] - CENTER[0]
@@ -65,16 +70,26 @@ def main():
                 if space_selected == (a, sect) or a < 0 or a > 3: # the user clicked the same space twice
                     space_selected = () # deselect
                     player_clicks = [] # clear clicks
+                elif (board.board[a][sect] == "--" and not len(player_clicks)):
+                    break
                 else:
                     space_selected = (a, sect)
                     player_clicks.append(space_selected)
                     
                 if len(player_clicks) == 2: # after second move
                     move = Move(player_clicks[0], player_clicks[1], board.board)
-                    board.make_move(move)
+                    print(move.get_chess_notation())
+                    if move in valid_moves:
+                        board.make_move(move)
+                        move_made = True
                     space_selected = ()
                     player_clicks = []
-                    print(move.get_chess_notation())
+                
+            # key handler
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_z:
+                    board.undo_move()
+                    move_made = True
                     
                 
                 # if a < 0 or a > 3:
@@ -86,6 +101,9 @@ def main():
         clock.tick(FPS)  # move this later ?
 
         # Logical udates here
+        if move_made:
+            valid_moves = board.get_valid_moves()
+            move_made = False
 
         # Render the graphics here.
         board.draw_board(WINDOW)  # move this later ?
