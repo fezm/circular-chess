@@ -1,4 +1,5 @@
 import pygame
+from math import pi
 """
 All of our constants
 """
@@ -8,8 +9,14 @@ WIDTH, HEIGHT = 800, 800
 ANNULI = 4
 SECTORS = 16
 
-CENTER = (WIDTH//2, HEIGHT//2)
-RADIUS = WIDTH//2
+CENTER = (WIDTH/2, HEIGHT/2)
+RADIUS = WIDTH/2
+MIDDLE_RADIUS = WIDTH / 6
+
+SPACING = (WIDTH/2 - MIDDLE_RADIUS) / ANNULI
+SLICE = 2*pi/SECTORS
+
+PIECE_SIZE = 60
 
 # rgb
 BLACK = (0, 0, 0)
