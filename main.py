@@ -1,6 +1,6 @@
 import pygame as pg
 from constants import *
-from board import Board
+from board import Board, Move
 import numpy as np
 
 FPS = 60
@@ -45,10 +45,9 @@ def main():
     load_images()
     # print(IMAGES.keys())
 
-    board.draw_board(WINDOW)  # move this later ?
-    board.draw_pieces(WINDOW, IMAGES)
-
     run = True
+    space_selected = () # keeps track of last click of the user (tuple: (annulus, sector))
+    player_clicks = [] # keeps track of player clicks. array of tuples (list: [tuple])
     while run:
         # Process player inputs
         for event in pg.event.get():
@@ -63,16 +62,34 @@ def main():
                 a = int((np.sqrt(x**2 + y**2) - MIDDLE_RADIUS) // SPACING)
                 sect = int((np.pi - np.arctan2(y,x)) // SLICE)
                 
-                if a < 0 or a > 3:
-                    break
-                print(f"piece: {board.board[a][sect]}")
-                pass
+                if space_selected == (a, sect) or a < 0 or a > 3: # the user clicked the same space twice
+                    space_selected = () # deselect
+                    player_clicks = [] # clear clicks
+                else:
+                    space_selected = (a, sect)
+                    player_clicks.append(space_selected)
+                    
+                if len(player_clicks) == 2: # after second move
+                    move = Move(player_clicks[0], player_clicks[1], board.board)
+                    board.make_move(move)
+                    space_selected = ()
+                    player_clicks = []
+                    print(move.get_chess_notation())
+                    
+                
+                # if a < 0 or a > 3:
+                #     break
+                # print(f"piece: {board.board[a][sect]}")
+                
+            
 
         clock.tick(FPS)  # move this later ?
 
         # Logical udates here
 
         # Render the graphics here.
+        board.draw_board(WINDOW)  # move this later ?
+        board.draw_pieces(WINDOW, IMAGES)
         pg.display.update()
 
     pg.quit()

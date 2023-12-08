@@ -22,7 +22,9 @@ class Board:
              "--", "--", "wp", "wR", "wR", "wp", "--", "--"]
         ]
 
-        self.selected_piece = None
+        self.white_to_move = True
+        
+        self.move_log = []
 
     def fill_arc(self, window, center, radius, theta0, theta1, color, ndiv=150):
         x0, y0 = center
@@ -65,19 +67,19 @@ class Board:
                     theta = theta0 + (SLICE * sect)
 
                     if sect >= 0 and sect < 4:
-                        quad = "top left"
+                        # top left
                         x = x0 + ((r * np.cos(pi - theta))) - (PIECE_SIZE/2)
                         y = y0 - ((r * np.sin(pi - theta))) - PIECE_SIZE
                     elif sect >= 4 and sect < 8:
-                        quad = "top right"
+                        # top right
                         x = x0 - (r * np.cos(theta)) - (PIECE_SIZE/2)
                         y = y0 - (r * np.sin(theta)) - PIECE_SIZE
                     elif sect >= 8 and sect < 12:
-                        quad = "bottom right"
+                        # bottom right
                         x = x0 + (r * np.cos(pi - theta)) - (PIECE_SIZE/2)
                         y = y0 - (r * np.sin(pi - theta))
                     elif sect >= 12 and sect < 16:
-                        quad = "bottom left"
+                        # bottom left
                         x = x0 + (r * np.cos(pi - theta)) - (PIECE_SIZE/2)
                         y = y0 - (r * np.sin(pi - theta))
 
@@ -87,3 +89,35 @@ class Board:
     def draw(self, window, images):
         self.draw_board(window)
         self.draw_pieces(window, images)
+        
+    def make_move(self, move):
+        self.board[move.start_ann][move.start_sect] = "--"
+        self.board[move.end_ann][move.end_sect] = move.piece_moved
+        self.move_log.append(move)
+        self.white_to_move = not self.white_to_move
+
+
+
+class Move():
+    ann_to_rank = {0: '1', 1: '2', 2: '3', 3: '4'}
+    rank_to_ann = {v: k for k, v in ann_to_rank.items()}
+    
+    sect_to_file = {0: 'l', 1: 'k', 2: 'j', 3: 'i', 4: 'h', 5: 'g', 6: 'f', 7: 'e',
+                    8: 'd', 9: 'c', 10: 'b', 11: 'a', 12: 'p', 13: 'o', 14: 'n', 15: 'm'}
+    file_to_sect = {v: k for k, v in sect_to_file.items()}
+    
+    def __init__(self, start_space, end_space, board):
+        self.start_ann = start_space[0]
+        self.start_sect = start_space[1]
+        
+        self.end_ann = end_space[0]
+        self.end_sect = end_space[1]
+        
+        self.piece_moved = board[self.start_ann][self.start_sect]
+        self.piece_captured = board[self.end_ann][self.end_sect]
+        
+    def get_chess_notation(self):
+        return self.get_file_rank(self.start_ann, self.start_sect) + ' ' + self.get_file_rank(self.end_ann, self.end_sect)
+        
+    def get_file_rank(self, a, sect):
+        return self.sect_to_file[sect] + self.ann_to_rank[a]
