@@ -230,7 +230,7 @@ class Board:
             new_a = ann + direction[0]
             new_sect = sec + direction[1]
             if new_sect == -1:
-                new_sect == 15
+                new_sect = 15
             elif new_sect == 16:
                 new_sect = 0
             if not is_valid_space(new_a, new_sect):

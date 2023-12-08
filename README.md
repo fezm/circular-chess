@@ -2,13 +2,13 @@
 
 ## Overview
 
-Circular Chess is a unique chess variant played on a circular board. This project aims to implement the game rules and provide a platform for enthusiasts to play circular chess.
+Circular Chess is a unique chess variant played on a circular board. This project aims to implement the game rules and provide a platform for enthusiasts to play circular chess. [Here](https://www.youtube.com/watch?v=M2ZEVt-AviE) is a quick playthrough of a match of circular chess!
 
 ### Author
 
 - [Miguel Fernandez](https://github.com/fezm)
 
-I am the sole author and contributor to this project.
+I am the sole author and contributor to this project. [Eddie Sharick](https://www.youtube.com/@eddiesharick6649)'s "Chess Engine in Python" series was a big help though!
 
 
 ## Features

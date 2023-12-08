@@ -68,7 +68,6 @@ def main():
                     move = Move(player_clicks[0], player_clicks[1], board.board)
                     if move in valid_moves:
                         board.make_move(move)
-                        board.move_log.append(move.get_chess_notation())
                         print(move.get_chess_notation())
                         move_made = True
                     space_selected = ()
