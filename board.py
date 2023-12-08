@@ -20,6 +20,12 @@ class Board:
             ["--", "--", "bp", "bR", "bR", "bp", "--", "--",
              "--", "--", "wp", "wR", "wR", "wp", "--", "--"]
         ]
+        self.move_functions = {'p': self.get_pawn_moves,
+                               'R': self.get_rook_moves,
+                               'B': self.get_bishop_moves,
+                               'N': self.get_knight_moves,
+                               'Q': self.get_queen_moves,
+                               'K': self.get_king_moves}
 
         self.white_to_move = True
 
@@ -114,16 +120,15 @@ class Board:
                 if (turn == 'w' and self.white_to_move) or \
                         (turn == 'b' and not self.white_to_move):
                     piece = self.board[a][sect][1]
-                    if piece == 'p':
-                        self.get_pawn_moves(a, sect, moves)
-                    elif piece == 'R':
-                        self.get_rook_moves(a, sect, moves)
+                    # calls appropriate move function based on piece type
+                    self.move_functions[piece](a, sect, moves)
+
         return moves
 
     def get_pawn_moves(self, a, sect, moves):
         on_right_half = sect > 4 and sect < 11
-        on_left_half_W = (sect > 12 and sect < 15) or (sect >= 0 and sect < 3)
-        on_left_half_B = (sect > 12 and sect <= 15) or (sect > 0 and sect < 3)
+        on_left_half_w = (sect > 12 and sect < 15) or (sect >= 0 and sect < 3)
+        on_left_half_b = (sect > 12 and sect <= 15) or (sect > 0 and sect < 3)
 
         if self.white_to_move:
             # one-square pawn move
@@ -134,7 +139,7 @@ class Board:
                     if sect == 10 and self.board[a][sect - 2] == "--":
                         moves.append(
                             Move((a, sect), (a, sect - 2), self.board))
-            elif on_left_half_W:
+            elif on_left_half_w:
                 if self.board[a][sect + 1] == "--":
                     moves.append(Move((a, sect), (a, sect + 1), self.board))
                     # two square pawn move
@@ -149,8 +154,25 @@ class Board:
                 if on_right_half:
                     if self.board[a - 1][sect - 1][0] == 'b':
                         moves.append(
-                            Move((a, sect), (a-1, sect - 1), self.board))
-                    
+                            Move((a, sect), (a - 1, sect - 1), self.board))
+                elif on_left_half_w:
+                    if self.board[a - 1][sect + 1][0] == 'b':
+                        moves.append(
+                            Move((a, sect), (a - 1, sect + 1), self.board))
+                elif sect == 15 and self.board[a - 1][0][0] == 'b':
+                    moves.append((Move((a, sect), (a - 1, 0), self.board)))
+
+            if a + 1 < 4:
+                if on_right_half:
+                    if self.board[a + 1][sect - 1][0] == 'b':
+                        moves.append(
+                            Move((a, sect), (a + 1, sect - 1), self.board))
+                elif on_left_half_w:
+                    if self.board[a + 1][sect + 1][0] == 'b':
+                        moves.append(
+                            Move((a, sect), (a + 1, sect + 1), self.board))
+                elif sect == 15 and self.board[a + 1][0][0] == 'b':
+                    moves.append((Move((a, sect), (a + 1, 0), self.board)))
 
         else:  # black's turn
             # one-square pawn move
@@ -161,7 +183,7 @@ class Board:
                     if sect == 5 and self.board[a][sect + 2] == "--":
                         moves.append(
                             Move((a, sect), (a, sect + 2), self.board))
-            elif on_left_half_B:
+            elif on_left_half_b:
                 if self.board[a][sect - 1] == "--":
                     moves.append(Move((a, sect), (a, sect - 1), self.board))
                     # two square pawn move
@@ -171,7 +193,119 @@ class Board:
             elif sect == 0 and self.board[a][15] == "--":
                 moves.append(Move((a, sect), (a, 15), self.board))
 
+            # captures
+            if a - 1 >= 0:
+                if on_right_half:
+                    if self.board[a - 1][sect + 1][0] == 'w':
+                        moves.append(
+                            Move((a, sect), (a - 1, sect + 1), self.board))
+                elif on_left_half_b:
+                    if self.board[a - 1][sect - 1][0] == 'w':
+                        moves.append(
+                            Move((a, sect), (a - 1, sect - 1), self.board))
+                elif sect == 0 and self.board[a - 1][15][0] == 'w':
+                    moves.append((Move((a, sect), (a - 1, 15), self.board)))
+
+            if a + 1 < 4:
+                if on_right_half:
+                    if self.board[a + 1][sect + 1][0] == 'w':
+                        moves.append(
+                            Move((a, sect), (a + 1, sect + 1), self.board))
+                elif on_left_half_b:
+                    if self.board[a + 1][sect - 1][0] == 'w':
+                        moves.append(
+                            Move((a, sect), (a + 1, sect - 1), self.board))
+                elif sect == 0 and self.board[a + 1][15][0] == 'w':
+                    moves.append((Move((a, sect), (a + 1, 15), self.board)))
+
     def get_rook_moves(self, a, sect, moves):
+        enemy_color = 'b' if self.white_to_move else 'w'
+
+        def is_valid_space(ann, sec):
+            return (sec >= 0 and sec < 16) and (ann >= 0 and ann < 4)
+
+        def check_left(sec):
+            if sec == 15:
+                if self.board[a][0] == '--':
+                    moves.append(Move((a, sect), (a, 0), self.board))
+                    check_left(0)
+                    return
+                elif self.board[a][0][0] == enemy_color:
+                    moves.append(Move((a, sect), (a, 0), self.board))
+                    return
+
+            for next_sect in range(sec + 1, 16):
+                if next_sect == 15:
+                    check_left(next_sect)
+                    return
+                if self.board[a][next_sect] == '--':
+                    moves.append(Move((a, sect), (a, next_sect), self.board))
+                elif self.board[a][next_sect][0] == enemy_color:
+                    moves.append(Move((a, sect), (a, next_sect), self.board))
+                    return
+                else:
+                    return
+
+        def check_right(sec):
+            if sec == 0:
+                if self.board[a][15] == '--':
+                    moves.append(Move((a, sect), (a, 15), self.board))
+                    check_right(15)
+                    return
+                elif self.board[a][15][0] == enemy_color:
+                    moves.append(Move((a, sect), (a, 15), self.board))
+                    return
+
+            for next_sect in range(sec - 1, -1, -1):
+                if next_sect == 0:
+                    check_right(next_sect)
+                    return
+                if self.board[a][next_sect] == '--':
+                    moves.append(Move((a, sect), (a, next_sect), self.board))
+                elif self.board[a][next_sect][0] == enemy_color:
+                    moves.append(Move((a, sect), (a, next_sect), self.board))
+                    return
+                else:
+                    return
+
+        check_left(sect)
+        check_right(sect)
+
+        # check outer rings
+        for next_ann in range(a + 1, 4):
+            if not is_valid_space(next_ann, sect):
+                break
+
+            if self.board[next_ann][sect] == '--':
+                moves.append(Move((a, sect), (next_ann, sect), self.board))
+            elif self.board[next_ann][sect][0] == enemy_color:
+                moves.append(Move((a, sect), (next_ann, sect), self.board))
+                break
+            else:
+                break
+
+        # check inner rings
+        for next_ann in range(a - 1, -1, -1):
+            if not is_valid_space(next_ann, sect):
+                break
+            if self.board[next_ann][sect] == '--':
+                moves.append(Move((a, sect), (next_ann, sect), self.board))
+            elif self.board[next_ann][sect][0] == enemy_color:
+                moves.append(Move((a, sect), (next_ann, sect), self.board))
+                break
+            else:
+                break
+
+    def get_bishop_moves(self, a, sect, moves):
+        pass
+
+    def get_knight_moves(self, a, sect, moves):
+        pass
+
+    def get_queen_moves(self, a, sect, moves):
+        pass
+
+    def get_king_moves(self, a, sect, moves):
         pass
 
 
