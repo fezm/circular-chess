@@ -32,12 +32,15 @@ The moves of the pieces are identical to orthodox chess:
 
 - A queen or rook may move any distance around a ring if not obstructed.
 - The "null move" of moving a piece all the way around the board and back to its original square is not permitted.
-- A pawn is promoted after moving six squares from its initial position, reaching the square immediately before the opponent's starting line.
+- A pawn is promoted after moving six squares from its initial position, reaching the square immediately before the opponent's starting line. 
 
 ### Special Rules
 
 - Castling and en passant captures are not permitted.
 - "Snaffling" is allowed, meaning you can win the game immediately by capturing the opponent's king after they either moved into or failed to move out of check.
+
+**Note:** This version of Circular Chess does not currently support pawn promotion.
+
 
 These rules create a unique and engaging variant of chess, offering a different strategic dimension with the circular board layout.
 

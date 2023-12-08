@@ -5,7 +5,7 @@ import numpy as np
 
 FPS = 60
 
-# move this later
+# Move this later
 IMAGES = {}
 
 
@@ -14,8 +14,7 @@ def load_images():
               'bp', 'bN', 'bB', 'bR', 'bQ', 'bK']
 
     for piece in pieces:
-        # IMAGES[piece] = pg.image.load("images/" + piece + ".png")
-        # define width, height
+        # Load and scale images
         IMAGES[piece] = pg.transform.scale(pg.image.load(
             "images/" + piece + ".png"), (PIECE_SIZE, PIECE_SIZE))
 
@@ -23,48 +22,52 @@ def load_images():
 def main():
     pg.init()
 
+    # Set up the game window
     WINDOW = pg.display.set_mode((WIDTH, HEIGHT))
     pg.display.set_caption("Circular Chess Board")
 
     clock = pg.time.Clock()
     WINDOW.fill(GRAY)
 
+    # Initialize the chess board
     board = Board()
     valid_moves = board.get_valid_moves()
-    move_made = False # variable for when a move is made
-    
+    move_made = False  # Variable for when a move is made
+
+    # Load chess piece images
     load_images()
-    # print(IMAGES.keys())
 
     run = True
-    space_selected = () # keeps track of last click of the user (tuple: (annulus, sector))
-    player_clicks = [] # keeps track of player clicks. array of tuples (list: [tuple])
+    space_selected = ()  # Keeps track of the last click of the user (tuple: (annulus, sector))
+    player_clicks = []  # Keeps track of player clicks. Array of tuples (list: [tuple])
+
     while run:
         # Process player inputs
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
                 break
-            
-            # mouse handler
+
+            # Mouse handler
             elif event.type == pg.MOUSEBUTTONDOWN:
-                location = pg.mouse.get_pos()  # (x, y) location of mouse
+                location = pg.mouse.get_pos()  # (x, y) location of the mouse
                 x = location[0] - CENTER[0]
                 y = CENTER[1] - location[1]
-                
+
                 a = int((np.sqrt(x**2 + y**2) - MIDDLE_RADIUS) // SPACING)
-                sect = int((np.pi - np.arctan2(y,x)) // SLICE)
-                
-                if space_selected == (a, sect) or a < 0 or a > 3: # the user clicked the same space twice
-                    space_selected = () # deselect
-                    player_clicks = [] # clear clicks
+                sect = int((np.pi - np.arctan2(y, x)) // SLICE)
+
+                if space_selected == (a, sect) or a < 0 or a > 3:  
+                    # The user clicked the same space twice or clicked outside of the board
+                    space_selected = ()  # Deselect
+                    player_clicks = []  # Clear clicks
                 elif (board.board[a][sect] == "--" and not len(player_clicks)):
                     break
                 else:
                     space_selected = (a, sect)
                     player_clicks.append(space_selected)
-                    
-                if len(player_clicks) == 2: # after second move
+
+                if len(player_clicks) == 2:  # After the second move
                     move = Move(player_clicks[0], player_clicks[1], board.board)
                     if move in valid_moves:
                         board.make_move(move)
@@ -72,24 +75,22 @@ def main():
                         move_made = True
                     space_selected = ()
                     player_clicks = []
-                
-            # key handler
+
+            # Key handler
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_z:
                     board.undo_move()
                     move_made = True
 
-
         clock.tick(FPS)
 
-        # Logical udates here
+        # Logical updates here
         if move_made:
             valid_moves = board.get_valid_moves()
             move_made = False
 
-        # Render the graphics here.
-        board.draw_board(WINDOW)
-        board.draw_pieces(WINDOW, IMAGES)
+        # Render the graphics here
+        board.draw(WINDOW, IMAGES)
         pg.display.update()
 
     pg.quit()
