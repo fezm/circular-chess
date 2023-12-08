@@ -2,7 +2,7 @@
 
 ## Overview
 
-Circular Chess is a unique chess variant played on a circular board. This project aims to implement the game rules and provide a platform for enthusiasts to play circular chess online.
+Circular Chess is a unique chess variant played on a circular board. This project aims to implement the game rules and provide a platform for enthusiasts to play circular chess.
 
 ### Author
 
