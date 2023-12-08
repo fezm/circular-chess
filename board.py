@@ -297,16 +297,94 @@ class Board:
                 break
 
     def get_bishop_moves(self, a, sect, moves):
-        pass
+        enemy_color = 'b' if self.white_to_move else 'w'
+        directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 
-    def get_knight_moves(self, a, sect, moves):
-        pass
+        def is_valid_space(ann, sec):
+            return (sec >= 0 and sec < 16) and (ann >= 0 and ann < 4)
+
+        def check(direction, ann, sec):
+            new_a = ann + direction[0]
+            new_sect = sec + direction[1]
+            if new_sect == -1:
+                new_sect == 15
+            elif new_sect == 16:
+                new_sect = 0
+            if not is_valid_space(new_a, new_sect):
+                return
+
+            if self.board[new_a][new_sect] == "--":
+                moves.append(Move((a, sect), (new_a, new_sect), self.board))
+                check(direction, new_a, new_sect)
+            elif self.board[new_a][new_sect][0] == enemy_color:
+                moves.append(Move((a, sect), (new_a, new_sect), self.board))
+                return
+
+        for d in directions:
+            check(d, a, sect)
 
     def get_queen_moves(self, a, sect, moves):
-        pass
+        self.get_bishop_moves(a, sect, moves)
+        self.get_rook_moves(a, sect, moves)
 
     def get_king_moves(self, a, sect, moves):
-        pass
+        enemy_color = 'b' if self.white_to_move else 'w'
+        directions = [(-1, -1), (-1, 1), (1, -1), (1, 1),
+                      (1, 0), (0, 1), (-1, 0), (0, -1)]
+
+        def is_valid_space(ann, sec):
+            return (sec >= 0 and sec < 16) and (ann >= 0 and ann < 4)
+
+        def check(direction, ann, sec):
+            new_a = ann + direction[0]
+            new_sect = sec + direction[1]
+            if new_sect == -1:
+                new_sect == 15
+            elif new_sect == 16:
+                new_sect = 0
+            if not is_valid_space(new_a, new_sect):
+                return
+
+            if self.board[new_a][new_sect] == "--":
+                moves.append(Move((a, sect), (new_a, new_sect), self.board))
+            elif self.board[new_a][new_sect][0] == enemy_color:
+                moves.append(Move((a, sect), (new_a, new_sect), self.board))
+                
+            return
+
+        for d in directions:
+            check(d, a, sect)
+
+    def get_knight_moves(self, a, sect, moves):
+        enemy_color = 'b' if self.white_to_move else 'w'
+        directions = [(2, 1), (2, -1), (-2, 1), (-2, -1),
+                      (1, 2), (1, -2), (-1, 2), (-1, -2)]
+
+        def is_valid_space(ann, sec):
+            return (sec >= 0 and sec < 16) and (ann >= 0 and ann < 4)
+
+        def check(direction, ann, sec):
+            new_a = ann + direction[0]
+            new_sect = sec + direction[1]
+            if new_sect == -1:
+                new_sect == 15
+            elif new_sect == 16:
+                new_sect = 0
+            elif new_sect == -2:
+                new_sect = 14
+            elif new_sect == 17:
+                new_sect = 1
+            if not is_valid_space(new_a, new_sect):
+                return
+
+            if self.board[new_a][new_sect] == "--":
+                moves.append(Move((a, sect), (new_a, new_sect), self.board))
+            elif self.board[new_a][new_sect][0] == enemy_color:
+                moves.append(Move((a, sect), (new_a, new_sect), self.board))
+            return
+
+        for d in directions:
+            check(d, a, sect)
 
 
 class Move():
@@ -340,7 +418,17 @@ class Move():
         return False
 
     def get_chess_notation(self):
-        return self.get_file_rank(self.start_ann, self.start_sect) + self.get_file_rank(self.end_ann, self.end_sect)
+        piece_char = ''
+        if self.piece_moved[1] != 'p':
+            piece_char = self.piece_moved[1]
+            
+        if self.piece_captured == "--":
+            return piece_char + self.get_file_rank(self.end_ann, self.end_sect)
+        else:
+            piece2_char = ''
+            if self.piece_captured[1] != 'p':
+                piece2_char = self.piece_captured[1]
+            return piece_char + self.get_file_rank(self.start_ann, self.start_sect) + 'x' + piece2_char + self.get_file_rank(self.end_ann, self.end_sect)
 
     def get_file_rank(self, a, sect):
         return self.sect_to_file[sect] + self.ann_to_rank[a]
