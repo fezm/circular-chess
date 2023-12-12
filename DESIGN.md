@@ -34,7 +34,10 @@ The Circular Chess project consists of three main files: `main.py`, `board.py`, 
 
 ### Future Considerations
 
-- The `get_rook_moves` function is currently a placeholder. Future updates may include implementing the movement logic for rooks and other pieces as well.
+- Enhance the gameplay by adding support for pawn promotion, allowing players to exchange their pawns for more powerful pieces upon reaching the opposite end of the circular chessboard.
+- Improve the user experience by incorporating an in-game indicator highlighting the last piece moved or the most recent move made.
+- Introduce an exciting dynamic to the game by implementing timers, offering players the option to engage in timed chess matches.
+- Refine the game's conclusion by incorporating a rule where capturing the king results in an immediate end to the game.
 
 ## constants.py
 
