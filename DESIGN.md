@@ -32,12 +32,6 @@ The Circular Chess project consists of three main files: `main.py`, `board.py`, 
 - Implements methods for drawing the circular game board and rendering pieces.
 - Implements move-related functions, including making moves, undoing moves, and obtaining valid moves.
 
-### Future Considerations
-
-- Enhance the gameplay by adding support for pawn promotion, allowing players to exchange their pawns for more powerful pieces upon reaching the opposite end of the circular chessboard.
-- Improve the user experience by incorporating an in-game indicator highlighting the last piece moved or the most recent move made.
-- Introduce an exciting dynamic to the game by implementing timers, offering players the option to engage in timed chess matches.
-- Refine the game's conclusion by incorporating a rule where capturing the king results in an immediate end to the game.
 
 ## constants.py
 
@@ -55,7 +49,11 @@ The project adopts an object-oriented approach, with distinct classes for managi
 
 Future enhancements to the project may include:
 
+- Adding support for pawn promotion, allowing players to exchange their pawns for more powerful pieces upon reaching the opposite end of the circular chessboard.
+- Incorporating a rule where capturing the king results in an immediate end to the game.
 - Improving the user interface for a more visually appealing experience.
+- Implementing timers, offering players the option to engage in timed chess matches.
+- Incorporating an in-game indicator highlighting the last piece moved or the most recent move made.
 - Implementing additional chess variants or rules.
 - Implementing additional piece colors, or customizable square colors.
 - Optimizing the codebase for performance improvements.
