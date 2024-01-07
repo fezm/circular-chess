@@ -20,7 +20,7 @@ class Board:
             ["--", "--", "bp", "bR", "bR", "bp", "--", "--",
              "--", "--", "wp", "wR", "wR", "wp", "--", "--"]
         ]
-        self.move_functions = {'p': self.get_pawn_moves2,
+        self.move_functions = {'p': self.get_pawn_moves,
                                'R': self.get_rook_moves,
                                'B': self.get_bishop_moves,
                                'N': self.get_knight_moves,
@@ -30,6 +30,8 @@ class Board:
         self.white_to_move = True
 
         self.move_log = []
+        
+        self.moves = []
 
     def fill_arc(self, window, center, radius, theta0, theta1, color, ndiv=150):
         # Fills an arc in the window to represent a circular sector
@@ -128,7 +130,7 @@ class Board:
 
     def get_all_moves(self):
         # Gets all valid moves for the current player
-        moves = []
+        self.moves = []
         for a in range(ANNULI):
             for sect in range(SECTORS):
                 turn = self.board[a][sect][0]
@@ -136,242 +138,93 @@ class Board:
                         (turn == 'b' and not self.white_to_move):
                     piece = self.board[a][sect][1]
                     # Calls appropriate move function based on piece type
-                    self.move_functions[piece](a, sect, moves)
+                    self.move_functions[piece](a, sect, self.moves)
 
-        return moves
+        return self.moves
     
-    def get_pawn_moves2(self, a, sect, moves):
+    
+    def is_valid_space(self, ann, sec):
+            # Check if the given coordinates are within the valid chess board range
+            return (sec >= 0 and sec < SECTORS) and (ann >= 0 and ann < ANNULI)
         
-        on_left_half = sect > 12 or sect < 3
+        
+    # Helper function to check and add moves in a given direction
+    def rec_check(self, direction, a, sect):    
+        # Determine the color of the enemy based on the current player's turn
+        enemy_color = 'b' if self.white_to_move else 'w'
+
+        # Calculate the new coordinates based on the movement direction
+        new_a = a + direction[0]
+        new_sect = (sect + direction[1]) % SECTORS # mod handles wrap-around
+
+        # Check if the new coordinates are within the valid chess board range
+        if not self.is_valid_space(new_a, new_sect):
+            return
+
+        # If the target space is empty, add a regular move and recursively check further
+        if self.board[new_a][new_sect] == "--":
+            self.moves.append(Move((a, sect), (new_a, new_sect), self.board))
+            self.rec_check(direction, new_a, new_sect)
+            return
+        # If the target space has an enemy piece, add a capturing move and stop
+        elif self.board[new_a][new_sect][0] == enemy_color:
+            self.moves.append(Move((a, sect), (new_a, new_sect), self.board))
+            return
+        else:
+            # If the target space has a friendly piece, stop searching in this direction
+            return
+
+
+    def get_pawn_moves(self, a, sect, moves):
+
         on_right_half = sect > 4 and sect < 11
         enemy_color = 'b' if self.white_to_move else 'w'
-        next_sect = sect
 
         if on_right_half:
-            
             direction = -1 if self.white_to_move else 1
             start_space = 10 if self.white_to_move else 5
-        
-        elif on_left_half:
-            
+        else:
             direction = 1 if self.white_to_move else -1
             start_space = 13 if self.white_to_move else 2
-            
-            if sect + direction == 16:
-                next_sect = -1
-            elif sect + direction == -1:
-                next_sect = 16
-        
-        next_sect += direction
-        
+
+        next_sect = (sect+direction) % SECTORS
+
         # 1-space pawn move
         if self.board[a][next_sect] == "--":
             moves.append(Move((a, sect), (a, next_sect), self.board))
             # 2-space pawn move
             if sect == start_space and self.board[a][next_sect + direction] == "--":
-                moves.append(Move((a, sect), (a, next_sect + direction), self.board))
-                
+                moves.append(
+                    Move((a, sect), (a, next_sect + direction), self.board))
+
         # captures
         if a - 1 >= 0:
             if self.board[a - 1][next_sect][0] == enemy_color:
                 moves.append(Move((a, sect), (a - 1, next_sect), self.board))
         if a + 1 < 4:
             if self.board[a + 1][next_sect][0] == enemy_color:
-                print(f"a: {a} , a+1: {a+1}, sect: {sect}, sect+direction: {sect+direction}")
                 moves.append(Move((a, sect), (a + 1, next_sect), self.board))
-            
-            
-            
-    def get_pawn_moves(self, a, sect, moves):
-        # Determine the board region where the pawn is located
-        on_right_half = sect > 4 and sect < 11
-        on_left_half_w = (sect > 12 and sect < 15) or (sect >= 0 and sect < 3)
-        on_left_half_b = (sect > 12 and sect <= 15) or (sect > 0 and sect < 3)
-        
 
-        if self.white_to_move:
-            # White's turn
-
-            # One-square pawn move
-            if on_right_half:
-                if self.board[a][sect - 1] == "--":
-                    moves.append(Move((a, sect), (a, sect - 1), self.board))
-                    # Two-square pawn move
-                    if sect == 10 and self.board[a][sect - 2] == "--":
-                        moves.append(
-                            Move((a, sect), (a, sect - 2), self.board))
-            elif on_left_half_w:
-                if self.board[a][sect + 1] == "--":
-                    moves.append(Move((a, sect), (a, sect + 1), self.board))
-                    # Two-square pawn move
-                    if sect == 13 and self.board[a][sect + 2] == "--":
-                        moves.append(
-                            Move((a, sect), (a, sect + 2), self.board))
-            elif sect == 15 and self.board[a][0] == "--":
-                moves.append(Move((a, sect), (a, 0), self.board))
-
-            # Pawn captures
-            if a - 1 >= 0:
-                if on_right_half:
-                    if self.board[a - 1][sect - 1][0] == 'b':
-                        moves.append(
-                            Move((a, sect), (a - 1, sect - 1), self.board))
-                elif on_left_half_w:
-                    if self.board[a - 1][sect + 1][0] == 'b':
-                        moves.append(
-                            Move((a, sect), (a - 1, sect + 1), self.board))
-                elif sect == 15 and self.board[a - 1][0][0] == 'b':
-                    moves.append((Move((a, sect), (a - 1, 0), self.board)))
-
-            if a + 1 < 4:
-                if on_right_half:
-                    if self.board[a + 1][sect - 1][0] == 'b':
-                        moves.append(
-                            Move((a, sect), (a + 1, sect - 1), self.board))
-                elif on_left_half_w:
-                    if self.board[a + 1][sect + 1][0] == 'b':
-                        moves.append(
-                            Move((a, sect), (a + 1, sect + 1), self.board))
-                elif sect == 15 and self.board[a + 1][0][0] == 'b':
-                    moves.append((Move((a, sect), (a + 1, 0), self.board)))
-
-        else:
-            # Black's turn
-
-            # One-square pawn move
-            if on_right_half:
-                if self.board[a][sect + 1] == "--":
-                    moves.append(Move((a, sect), (a, sect + 1), self.board))
-                    # Two-square pawn move
-                    if sect == 5 and self.board[a][sect + 2] == "--":
-                        moves.append(
-                            Move((a, sect), (a, sect + 2), self.board))
-            elif on_left_half_b:
-                if self.board[a][sect - 1] == "--":
-                    moves.append(Move((a, sect), (a, sect - 1), self.board))
-                    # Two-square pawn move
-                    if sect == 2 and self.board[a][sect - 2] == "--":
-                        moves.append(
-                            Move((a, sect), (a, sect - 2), self.board))
-            elif sect == 0 and self.board[a][15] == "--":
-                moves.append(Move((a, sect), (a, 15), self.board))
-
-            # Pawn captures
-            if a - 1 >= 0:
-                if on_right_half:
-                    if self.board[a - 1][sect + 1][0] == 'w':
-                        moves.append(
-                            Move((a, sect), (a - 1, sect + 1), self.board))
-                elif on_left_half_b:
-                    if self.board[a - 1][sect - 1][0] == 'w':
-                        moves.append(
-                            Move((a, sect), (a - 1, sect - 1), self.board))
-                elif sect == 0 and self.board[a - 1][15][0] == 'w':
-                    moves.append((Move((a, sect), (a - 1, 15), self.board)))
-
-            if a + 1 < 4:
-                if on_right_half:
-                    if self.board[a + 1][sect + 1][0] == 'w':
-                        moves.append(
-                            Move((a, sect), (a + 1, sect + 1), self.board))
-                elif on_left_half_b:
-                    if self.board[a + 1][sect - 1][0] == 'w':
-                        moves.append(
-                            Move((a, sect), (a + 1, sect - 1), self.board))
-                elif sect == 0 and self.board[a + 1][15][0] == 'w':
-                    moves.append((Move((a, sect), (a + 1, 15), self.board)))
 
     def get_rook_moves(self, a, sect, moves):
-        # Determine the color of the enemy based on the current player's turn
-        enemy_color = 'b' if self.white_to_move else 'w'
-
         # Define possible movement directions for a rook
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-
-        def is_valid_space(ann, sec):
-            # Check if the given coordinates are within the valid chess board range
-            return (sec >= 0 and sec < 16) and (ann >= 0 and ann < 4)
-
-        def check(direction, ann, sec):
-            # Helper function to check and add moves in a given direction
-
-            # Calculate the new coordinates based on the movement direction
-            new_a = ann + direction[0]
-            new_sect = sec + direction[1]
-
-            # Handle wrap-around if the new sector goes beyond the board limits
-            if new_sect == -1:
-                new_sect = 15
-            elif new_sect == 16:
-                new_sect = 0
-
-            # Check if the new coordinates are within the valid chess board range
-            if not is_valid_space(new_a, new_sect):
-                return
-
-            # If the target space is empty, add a regular move and recursively check further
-            if self.board[new_a][new_sect] == "--":
-                moves.append(Move((a, sect), (new_a, new_sect), self.board))
-                check(direction, new_a, new_sect)
-                return
-            # If the target space has an enemy piece, add a capturing move and stop
-            elif self.board[new_a][new_sect][0] == enemy_color:
-                moves.append(Move((a, sect), (new_a, new_sect), self.board))
-                return
-            else:
-                # If the target space has a friendly piece, stop searching in this direction
-                return
 
         # Iterate over all possible movement directions for a rook
         for d in directions:
             # Check and add moves in the specified direction
-            check(d, a, sect)
+            self.rec_check(d, a, sect)
+
 
     def get_bishop_moves(self, a, sect, moves):
-        # Determine the color of the enemy based on the current player's turn
-        enemy_color = 'b' if self.white_to_move else 'w'
-
         # Define possible movement directions for a bishop
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
-
-        def is_valid_space(ann, sec):
-            # Check if the given coordinates are within the valid chess board range
-            return (sec >= 0 and sec < 16) and (ann >= 0 and ann < 4)
-
-        def check(direction, ann, sec):
-            # Helper function to check and add moves in a given diagonal direction
-
-            # Calculate the new coordinates based on the movement direction
-            new_a = ann + direction[0]
-            new_sect = sec + direction[1]
-
-            # Handle wrap-around if the new sector goes beyond the board limits
-            if new_sect == -1:
-                new_sect = 15
-            elif new_sect == 16:
-                new_sect = 0
-
-            # Check if the new coordinates are within the valid chess board range
-            if not is_valid_space(new_a, new_sect):
-                return
-
-            # If the target space is empty, add a regular move and recursively check further
-            if self.board[new_a][new_sect] == "--":
-                moves.append(Move((a, sect), (new_a, new_sect), self.board))
-                check(direction, new_a, new_sect)
-                return
-            # If the target space has an enemy piece, add a capturing move and stop
-            elif self.board[new_a][new_sect][0] == enemy_color:
-                moves.append(Move((a, sect), (new_a, new_sect), self.board))
-                return
-            else:
-                # If the target space has a friendly piece, stop searching in this direction
-                return
 
         # Iterate over all possible diagonal movement directions for a bishop
         for d in directions:
             # Check and add moves in the specified diagonal direction
-            check(d, a, sect)
+            self.rec_check(d, a, sect)
+
 
     def get_queen_moves(self, a, sect, moves):
         # Combine the moves of a bishop and a rook to get queen moves
@@ -386,19 +239,12 @@ class Board:
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1),
                       (1, 0), (0, 1), (-1, 0), (0, -1)]
 
-        def is_valid_space(ann, sec):
-            # Helper function to check if a space is within the board boundaries
-            return (sec >= 0 and sec < 16) and (ann >= 0 and ann < 4)
-
         def check(direction, ann, sec):
             # Helper function to check and add valid king moves in a given direction
             new_a = ann + direction[0]
-            new_sect = sec + direction[1]
-            if new_sect == -1:
-                new_sect = 15
-            elif new_sect == 16:
-                new_sect = 0
-            if not is_valid_space(new_a, new_sect):
+            new_sect = (sec + direction[1]) % 16
+    
+            if not self.is_valid_space(new_a, new_sect):
                 return
 
             if self.board[new_a][new_sect] == "--":
@@ -420,26 +266,13 @@ class Board:
         directions = [(2, 1), (2, -1), (-2, 1), (-2, -1),
                       (1, 2), (1, -2), (-1, 2), (-1, -2)]
 
-        def is_valid_space(ann, sec):
-            # Helper function to check if a space is within the board boundaries
-            return (sec >= 0 and sec < 16) and (ann >= 0 and ann < 4)
 
         def check(direction, ann, sec):
             # Helper function to check and add valid knight moves in a given direction
             new_a = ann + direction[0]
-            new_sect = sec + direction[1]
+            new_sect = (sec + direction[1]) % 16
 
-            # Adjust for circular board boundaries
-            if new_sect == -1:
-                new_sect = 15
-            elif new_sect == 16:
-                new_sect = 0
-            elif new_sect == -2:
-                new_sect = 14
-            elif new_sect == 17:
-                new_sect = 1
-
-            if not is_valid_space(new_a, new_sect):
+            if not self.is_valid_space(new_a, new_sect):
                 return
 
             if self.board[new_a][new_sect] == "--":
