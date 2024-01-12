@@ -4,6 +4,8 @@ from math import pi
 All of our constants
 """
 
+FPS = 60
+
 WIDTH, HEIGHT = 800, 800
 
 ANNULI = 4

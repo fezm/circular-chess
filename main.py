@@ -1,22 +1,8 @@
 import pygame as pg
 from constants import *
-from board import Board, Move
+from board import Board, Move, load_images, IMAGES
 import numpy as np
 
-FPS = 60
-
-# Move this later
-IMAGES = {}
-
-
-def load_images():
-    pieces = ['wp', 'wN', 'wB', 'wR', 'wQ', 'wK',
-              'bp', 'bN', 'bB', 'bR', 'bQ', 'bK']
-
-    for piece in pieces:
-        # Load and scale images
-        IMAGES[piece] = pg.transform.scale(pg.image.load(
-            "images/" + piece + ".png"), (PIECE_SIZE, PIECE_SIZE))
 
 
 def main():
@@ -24,7 +10,7 @@ def main():
 
     # Set up the game window
     WINDOW = pg.display.set_mode((WIDTH, HEIGHT))
-    pg.display.set_caption("Circular Chess Board")
+    pg.display.set_caption("Circular Chess")
 
     clock = pg.time.Clock()
     WINDOW.fill(GRAY)
