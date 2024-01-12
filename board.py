@@ -40,8 +40,7 @@ class Board:
         self.white_to_move = True
 
         self.move_log = []
-        
-        self.moves = []
+
 
     def fill_arc(self, window, center, radius, theta0, theta1, color, ndiv=150):
         # Fills an arc in the window to represent a circular sector
@@ -140,7 +139,7 @@ class Board:
 
     def get_all_moves(self):
         # Gets all valid moves for the current player
-        self.moves = []
+        moves = []
         for a in range(ANNULI):
             for sect in range(SECTORS):
                 turn = self.board[a][sect][0]
@@ -148,7 +147,7 @@ class Board:
                         (turn == 'b' and not self.white_to_move):
                     piece = self.board[a][sect][1]
                     # Calls appropriate move function based on piece type
-                    self.move_functions[piece](a, sect, self.moves)
+                    self.move_functions[piece](a, sect, moves)
 
         return moves
     
@@ -158,7 +157,6 @@ class Board:
     
     def get_pawn_moves(self, a, sect, moves):
         
-        on_left_half = sect > 12 or sect < 3
         on_right_half = sect > 4 and sect < 11
         enemy_color = 'b' if self.white_to_move else 'w'
 
@@ -190,6 +188,9 @@ class Board:
 
 
     def get_rook_moves(self, a, sect, moves):
+        # Determine the opponent's color based on the current player's turn
+        enemy_color = 'b' if self.white_to_move else 'w'
+        
         # Define possible movement directions for a rook
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
@@ -220,10 +221,13 @@ class Board:
         # Iterate over all possible movement directions for a rook
         for d in directions:
             # Check and add moves in the specified direction
-            self.rec_check(d, a, sect)
+            check(d, a, sect)
 
 
     def get_bishop_moves(self, a, sect, moves):
+        # Determine the opponent's color based on the current player's turn
+        enemy_color = 'b' if self.white_to_move else 'w'
+
         # Define possible movement directions for a bishop
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 
@@ -254,7 +258,7 @@ class Board:
         # Iterate over all possible diagonal movement directions for a bishop
         for d in directions:
             # Check and add moves in the specified diagonal direction
-            self.rec_check(d, a, sect)
+            check(d, a, sect)
 
 
     def get_queen_moves(self, a, sect, moves):
