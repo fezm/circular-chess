@@ -1,6 +1,7 @@
 import numpy as np
 import pygame as pg
 import pygame.gfxdraw
+from move import Move
 from constants import *
 
 
@@ -139,55 +140,54 @@ class Board:
                     self.move_functions[piece](a, sect, moves)
 
         return moves
-    
+
     def get_pawn_moves2(self, a, sect, moves):
-        
+
         on_left_half = sect > 12 or sect < 3
         on_right_half = sect > 4 and sect < 11
         enemy_color = 'b' if self.white_to_move else 'w'
         next_sect = sect
 
         if on_right_half:
-            
+
             direction = -1 if self.white_to_move else 1
             start_space = 10 if self.white_to_move else 5
-        
+
         elif on_left_half:
-            
+
             direction = 1 if self.white_to_move else -1
             start_space = 13 if self.white_to_move else 2
-            
+
             if sect + direction == 16:
                 next_sect = -1
             elif sect + direction == -1:
                 next_sect = 16
-        
+
         next_sect += direction
-        
+
         # 1-space pawn move
         if self.board[a][next_sect] == "--":
             moves.append(Move((a, sect), (a, next_sect), self.board))
             # 2-space pawn move
             if sect == start_space and self.board[a][next_sect + direction] == "--":
-                moves.append(Move((a, sect), (a, next_sect + direction), self.board))
-                
+                moves.append(
+                    Move((a, sect), (a, next_sect + direction), self.board))
+
         # captures
         if a - 1 >= 0:
             if self.board[a - 1][next_sect][0] == enemy_color:
                 moves.append(Move((a, sect), (a - 1, next_sect), self.board))
         if a + 1 < 4:
             if self.board[a + 1][next_sect][0] == enemy_color:
-                print(f"a: {a} , a+1: {a+1}, sect: {sect}, sect+direction: {sect+direction}")
+                print(
+                    f"a: {a} , a+1: {a+1}, sect: {sect}, sect+direction: {sect+direction}")
                 moves.append(Move((a, sect), (a + 1, next_sect), self.board))
-            
-            
-            
+
     def get_pawn_moves(self, a, sect, moves):
         # Determine the board region where the pawn is located
         on_right_half = sect > 4 and sect < 11
         on_left_half_w = (sect > 12 and sect < 15) or (sect >= 0 and sect < 3)
         on_left_half_b = (sect > 12 and sect <= 15) or (sect > 0 and sect < 3)
-        
 
         if self.white_to_move:
             # White's turn
@@ -452,51 +452,3 @@ class Board:
         # Check moves in all directions
         for d in directions:
             check(d, a, sect)
-
-
-class Move():
-    # Represents a chess move
-    ann_to_rank = {0: '1', 1: '2', 2: '3', 3: '4'}
-    rank_to_ann = {v: k for k, v in ann_to_rank.items()}
-
-    sect_to_file = {0: 'l', 1: 'k', 2: 'j', 3: 'i', 4: 'h', 5: 'g', 6: 'f', 7: 'e',
-                    8: 'd', 9: 'c', 10: 'b', 11: 'a', 12: 'p', 13: 'o', 14: 'n', 15: 'm'}
-    file_to_sect = {v: k for k, v in sect_to_file.items()}
-
-    def __init__(self, start_space, end_space, board):
-        # Initializes a move
-        self.start_ann = start_space[0]
-        self.start_sect = start_space[1]
-
-        self.end_ann = end_space[0]
-        self.end_sect = end_space[1]
-
-        self.piece_moved = board[self.start_ann][self.start_sect]
-        self.piece_captured = board[self.end_ann][self.end_sect]
-
-        self.move_id = self.start_ann * 1000 + self.start_sect * 100 + \
-            self.end_ann * 10 + self.end_sect
-
-    def __eq__(self, other):
-        # Overrides the equals method
-        if isinstance(other, Move):
-            return self.move_id == other.move_id
-        return False
-
-    def get_chess_notation(self):
-        # Gets the chess notation for the move
-        piece_char = ''
-        if self.piece_moved[1] != 'p':
-            piece_char = self.piece_moved[1]
-
-        if self.piece_captured == "--":
-            return piece_char + self.get_file_rank(self.end_ann, self.end_sect)
-        else:
-            piece2_char = ''
-            if self.piece_captured[1] != 'p':
-                piece2_char = self.piece_captured[1]
-            return piece_char + self.get_file_rank(self.start_ann, self.start_sect) + 'x' + piece2_char + self.get_file_rank(self.end_ann, self.end_sect)
-
-    def get_file_rank(self, a, sect):
-        # Gets the file and rank for a given position
-        return self.sect_to_file[sect] + self.ann_to_rank[a]
