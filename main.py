@@ -32,6 +32,7 @@ def main():
 
     # Initialize the chess board
     board = Board()
+    board.reset()
     valid_moves = board.get_valid_moves()
     move_made = False  # Variable for when a move is made
 
@@ -65,16 +66,20 @@ def main():
                     # The user clicked the same space twice or clicked outside of the board
                     space_selected = ()  # Deselect
                     player_clicks = []  # Clear clicks
+                    print("Stop displaying possible moves now")
                 elif (board.board[a][sect] == "--" and not len(player_clicks)):
                     break
                 else:
                     space_selected = (a, sect)
                     player_clicks.append(space_selected)
+                    # TODO: check for color of piece clicked
+                    print("Display possible moves now")
 
                 if len(player_clicks) == 2:  # After the second move
                     move = Move(player_clicks[0],
                                 player_clicks[1], board.board)
                     if move in valid_moves:
+                        print("Stop displaying possible moves now")
                         board.make_move(move)
                         print(move.get_chess_notation())
                         move_made = True
@@ -86,8 +91,10 @@ def main():
                 if event.key == pg.K_z:
                     board.undo_move()
                     move_made = True
+                elif event.key == pg.K_r:
+                    board.reset()
+                    move_made = True
 
-        
         """
         Logical updates
         """
