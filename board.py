@@ -32,6 +32,21 @@ class Board:
 
         self.move_log = []
 
+    def reset(self):
+        self.board = [
+            ["--", "--", "bp", "bQ", "bK", "bp", "--", "--",
+             "--", "--", "wp", "wK", "wQ", "wp", "--", "--"],
+            ["--", "--", "bp", "bB", "bB", "bp", "--", "--",
+             "--", "--", "wp", "wB", "wB", "wp", "--", "--"],
+            ["--", "--", "bp", "bN", "bN", "bp", "--", "--",
+             "--", "--", "wp", "wN", "wN", "wp", "--", "--"],
+            ["--", "--", "bp", "bR", "bR", "bp", "--", "--",
+             "--", "--", "wp", "wR", "wR", "wp", "--", "--"]
+        ]
+        self.move_log = []
+        self.white_to_move = True
+        return
+
     def fill_arc(self, window, center, radius, theta0, theta1, color, ndiv=150):
         # Fills an arc in the window to represent a circular sector
         x0, y0 = center
