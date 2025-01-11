@@ -18,37 +18,42 @@ class Pawn:
         # Initializes a pawn
         self.color = color
         self.sector = sector
-        self.on_left_half = self.on_left_half_fun()
-        self.dir = self.get_pawn_dir()
-        self.start_sector = self.get_start_sector()
-        self.end_sector = self.get_end_sector()
-        self.has_moved = self.has_moved_fun()
+        self.on_left_half = self._is_on_left_half()
+        self.dir = self._get_pawn_dir()
+        self.start_sector = self._get_start_sector()
+        self.end_sector = self._get_end_sector()
+        self.has_moved = self._has_moved_fun()
 
-    def on_left_half_fun(self):
+    def _is_on_left_half(self):
+        """Determine if the pawn is on the left half of the board."""
         return self.sector <= 3 or self.sector >= 12
 
-    def get_pawn_dir(self):
+    def _get_pawn_dir(self):
+        """Determine the movement direction of the pawn."""
         direction = 1 if self.color == PAWN_WHITE else -1
         return direction if self.on_left_half else -direction
 
-    def get_start_sector(self):
-        key = LEFT_WHITE if self.color == PAWN_WHITE and self.on_left_half else \
-            RIGHT_WHITE if self.color == PAWN_WHITE else \
-            LEFT_BLACK if self.on_left_half else \
-            RIGHT_BLACK
-        return start_sectors[key]
+    def _get_key(self):
+        """Determine the key for start and end sector lookups."""
+        if self.color == PAWN_WHITE:
+            return LEFT_WHITE if self.on_left_half else RIGHT_WHITE
+        else:
+            return LEFT_BLACK if self.on_left_half else RIGHT_BLACK
 
-    def get_end_sector(self):
-        key = LEFT_WHITE if self.color == PAWN_WHITE and self.on_left_half else \
-            RIGHT_WHITE if self.color == PAWN_WHITE else \
-            LEFT_BLACK if self.on_left_half else \
-            RIGHT_BLACK
-        return end_sectors[key]
+    def _get_start_sector(self):
+        """Get the starting sector for this pawn."""
+        return start_sectors[self._get_key()]
 
-    def has_moved_fun(self):
+    def _get_end_sector(self):
+        """Get the ending sector for this pawn."""
+        return end_sectors[self._get_key()]
+
+    def _has_moved_fun(self):
+        """Check if the pawn has moved from its starting sector."""
         return self.sector != self.start_sector
 
     def update_sector(self, new_sector):
+        """Update the pawn's current sector and movement status."""
         self.sector = new_sector
-        self.has_moved = self.has_moved_fun()
+        self.has_moved = self._has_moved_fun()
         return
