@@ -8,7 +8,8 @@ RIGHT_BLACK = 3
 PAWN_WHITE = 'w'
 PAWN_BLACK = 'b'
 
-
+start_sectors = {LEFT_WHITE: 13, RIGHT_WHITE: 10,
+                 LEFT_BLACK: 2, RIGHT_BLACK: 5}
 end_sectors = {LEFT_WHITE: 3, RIGHT_WHITE: 4, LEFT_BLACK: 12, RIGHT_BLACK: 11}
 
 
@@ -19,6 +20,7 @@ class Pawn:
         self.sector = sector
         self.on_left_half = self.on_left_half_fun()
         self.dir = self.get_pawn_dir()
+        self.start_sector = self.get_start_sector()
         self.end_sector = self.get_end_sector()
         self.has_moved = self.has_moved_fun()
 
@@ -29,6 +31,13 @@ class Pawn:
         direction = 1 if self.color == PAWN_WHITE else -1
         return direction if self.on_left_half else -direction
 
+    def get_start_sector(self):
+        key = LEFT_WHITE if self.color == PAWN_WHITE and self.on_left_half else \
+            RIGHT_WHITE if self.color == PAWN_WHITE else \
+            LEFT_BLACK if self.on_left_half else \
+            RIGHT_BLACK
+        return start_sectors[key]
+
     def get_end_sector(self):
         key = LEFT_WHITE if self.color == PAWN_WHITE and self.on_left_half else \
             RIGHT_WHITE if self.color == PAWN_WHITE else \
@@ -37,8 +46,7 @@ class Pawn:
         return end_sectors[key]
 
     def has_moved_fun(self):
-        # TODO
-        return
+        return self.sector != self.start_sector
 
     def update_sector(self, new_sector):
         self.sector = new_sector
