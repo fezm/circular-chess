@@ -2,6 +2,7 @@ import numpy as np
 import pygame as pg
 import pygame.gfxdraw
 from move import Move
+from pawn import Pawn
 from constants import *
 
 
@@ -21,7 +22,7 @@ class Board:
             ["--", "--", "bp", "bR", "bR", "bp", "--", "--",
              "--", "--", "wp", "wR", "wR", "wp", "--", "--"]
         ]
-        self.move_functions = {'p': self.get_pawn_moves2,
+        self.move_functions = {'p': self.get_pawn_moves,
                                'R': self.get_rook_moves,
                                'B': self.get_bishop_moves,
                                'N': self.get_knight_moves,
@@ -157,37 +158,20 @@ class Board:
 
         return moves
 
-    def get_pawn_moves2(self, a, sect, moves):
+    def get_pawn_moves(self, a, sect, moves):
 
-        on_left_half = sect > 12 or sect < 3
-        on_right_half = sect > 4 and sect < 11
-        enemy_color = 'b' if self.white_to_move else 'w'
-        next_sect = sect
-
-        if on_right_half:
-
-            direction = -1 if self.white_to_move else 1
-            start_space = 10 if self.white_to_move else 5
-
-        elif on_left_half:
-
-            direction = 1 if self.white_to_move else -1
-            start_space = 13 if self.white_to_move else 2
-
-            if sect + direction == 16:
-                next_sect = -1
-            elif sect + direction == -1:
-                next_sect = 16
-
-        next_sect += direction
+        color, enemy_color = ('w', 'b') if self.white_to_move else ('b', 'w')
+        pawn = Pawn(sect, color)
+        next_sect = (sect + pawn.dir) % SECTORS
 
         # 1-space pawn move
         if self.board[a][next_sect] == "--":
             moves.append(Move((a, sect), (a, next_sect), self.board))
             # 2-space pawn move
-            if sect == start_space and self.board[a][next_sect + direction] == "--":
+            next_next_sect = (next_sect + pawn.dir) % SECTORS
+            if sect == pawn.start_sector and self.board[a][next_next_sect] == "--":
                 moves.append(
-                    Move((a, sect), (a, next_sect + direction), self.board))
+                    Move((a, sect), (a, next_next_sect), self.board))
 
         # captures
         if a - 1 >= 0:
@@ -195,107 +179,7 @@ class Board:
                 moves.append(Move((a, sect), (a - 1, next_sect), self.board))
         if a + 1 < 4:
             if self.board[a + 1][next_sect][0] == enemy_color:
-                print(
-                    f"a: {a} , a+1: {a+1}, sect: {sect}, sect+direction: {sect+direction}")
                 moves.append(Move((a, sect), (a + 1, next_sect), self.board))
-
-    def get_pawn_moves(self, a, sect, moves):
-        # Determine the board region where the pawn is located
-        on_right_half = sect > 4 and sect < 11
-        on_left_half_w = (sect > 12 and sect < 15) or (sect >= 0 and sect < 3)
-        on_left_half_b = (sect > 12 and sect <= 15) or (sect > 0 and sect < 3)
-
-        if self.white_to_move:
-            # White's turn
-
-            # One-square pawn move
-            if on_right_half:
-                if self.board[a][sect - 1] == "--":
-                    moves.append(Move((a, sect), (a, sect - 1), self.board))
-                    # Two-square pawn move
-                    if sect == 10 and self.board[a][sect - 2] == "--":
-                        moves.append(
-                            Move((a, sect), (a, sect - 2), self.board))
-            elif on_left_half_w:
-                if self.board[a][sect + 1] == "--":
-                    moves.append(Move((a, sect), (a, sect + 1), self.board))
-                    # Two-square pawn move
-                    if sect == 13 and self.board[a][sect + 2] == "--":
-                        moves.append(
-                            Move((a, sect), (a, sect + 2), self.board))
-            elif sect == 15 and self.board[a][0] == "--":
-                moves.append(Move((a, sect), (a, 0), self.board))
-
-            # Pawn captures
-            if a - 1 >= 0:
-                if on_right_half:
-                    if self.board[a - 1][sect - 1][0] == 'b':
-                        moves.append(
-                            Move((a, sect), (a - 1, sect - 1), self.board))
-                elif on_left_half_w:
-                    if self.board[a - 1][sect + 1][0] == 'b':
-                        moves.append(
-                            Move((a, sect), (a - 1, sect + 1), self.board))
-                elif sect == 15 and self.board[a - 1][0][0] == 'b':
-                    moves.append((Move((a, sect), (a - 1, 0), self.board)))
-
-            if a + 1 < 4:
-                if on_right_half:
-                    if self.board[a + 1][sect - 1][0] == 'b':
-                        moves.append(
-                            Move((a, sect), (a + 1, sect - 1), self.board))
-                elif on_left_half_w:
-                    if self.board[a + 1][sect + 1][0] == 'b':
-                        moves.append(
-                            Move((a, sect), (a + 1, sect + 1), self.board))
-                elif sect == 15 and self.board[a + 1][0][0] == 'b':
-                    moves.append((Move((a, sect), (a + 1, 0), self.board)))
-
-        else:
-            # Black's turn
-
-            # One-square pawn move
-            if on_right_half:
-                if self.board[a][sect + 1] == "--":
-                    moves.append(Move((a, sect), (a, sect + 1), self.board))
-                    # Two-square pawn move
-                    if sect == 5 and self.board[a][sect + 2] == "--":
-                        moves.append(
-                            Move((a, sect), (a, sect + 2), self.board))
-            elif on_left_half_b:
-                if self.board[a][sect - 1] == "--":
-                    moves.append(Move((a, sect), (a, sect - 1), self.board))
-                    # Two-square pawn move
-                    if sect == 2 and self.board[a][sect - 2] == "--":
-                        moves.append(
-                            Move((a, sect), (a, sect - 2), self.board))
-            elif sect == 0 and self.board[a][15] == "--":
-                moves.append(Move((a, sect), (a, 15), self.board))
-
-            # Pawn captures
-            if a - 1 >= 0:
-                if on_right_half:
-                    if self.board[a - 1][sect + 1][0] == 'w':
-                        moves.append(
-                            Move((a, sect), (a - 1, sect + 1), self.board))
-                elif on_left_half_b:
-                    if self.board[a - 1][sect - 1][0] == 'w':
-                        moves.append(
-                            Move((a, sect), (a - 1, sect - 1), self.board))
-                elif sect == 0 and self.board[a - 1][15][0] == 'w':
-                    moves.append((Move((a, sect), (a - 1, 15), self.board)))
-
-            if a + 1 < 4:
-                if on_right_half:
-                    if self.board[a + 1][sect + 1][0] == 'w':
-                        moves.append(
-                            Move((a, sect), (a + 1, sect + 1), self.board))
-                elif on_left_half_b:
-                    if self.board[a + 1][sect - 1][0] == 'w':
-                        moves.append(
-                            Move((a, sect), (a + 1, sect - 1), self.board))
-                elif sect == 0 and self.board[a + 1][15][0] == 'w':
-                    moves.append((Move((a, sect), (a + 1, 15), self.board)))
 
     def get_rook_moves(self, a, sect, moves):
         # Determine the color of the enemy based on the current player's turn
