@@ -121,6 +121,7 @@ class Board:
 
     def draw(self, window, images):
         # Combines the board and piece drawing
+        window.fill(GRAY)
         self.draw_board(window)
         self.draw_pieces(window, images)
 
