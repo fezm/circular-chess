@@ -22,7 +22,6 @@ class Pawn:
         self.dir = self._get_pawn_dir()
         self.start_sector = self._get_start_sector()
         self.end_sector = self._get_end_sector()
-        self.has_moved = self._has_moved_fun()
 
     def _is_on_left_half(self):
         """Determine if the pawn is on the left half of the board."""
@@ -47,10 +46,6 @@ class Pawn:
     def _get_end_sector(self):
         """Get the ending sector for this pawn."""
         return end_sectors[self._get_key()]
-
-    def _has_moved_fun(self):
-        """Check if the pawn has moved from its starting sector."""
-        return self.sector != self.start_sector
 
     def update_sector(self, new_sector):
         """Update the pawn's current sector and movement status."""

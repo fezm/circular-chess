@@ -126,25 +126,31 @@ class Board:
         self.draw_board(window)
         self.draw_pieces(window, images)
 
-    def make_move(self, move):
+    def make_move(self, move: Move) -> None:
         # Makes a move on the board and updates the game state
         self.board[move.start_ann][move.start_sect] = "--"
         self.board[move.end_ann][move.end_sect] = move.piece_moved
         self.move_log.append(move)
         self.white_to_move = not self.white_to_move
+        return
 
-    def undo_move(self):
+    def undo_move(self) -> None:
         # Undoes the last move made
         if len(self.move_log) != 0:
             move = self.move_log.pop()
             self.board[move.start_ann][move.start_sect] = move.piece_moved
             self.board[move.end_ann][move.end_sect] = move.piece_captured
             self.white_to_move = not self.white_to_move
+        return
 
-    def get_valid_moves(self):
-        return self.get_all_moves()
+    def get_valid_moves(self) -> list:
+        # TODO
+        valid_moves = self.get_all_moves()
+        # for move in valid_moves:
+        #     # Do something
+        return valid_moves
 
-    def get_all_moves(self):
+    def get_all_moves(self) -> list:
         # Gets all valid moves for the current player
         moves = []
         for a in range(ANNULI):
@@ -158,7 +164,7 @@ class Board:
 
         return moves
 
-    def get_pawn_moves(self, a, sect, moves):
+    def get_pawn_moves(self, a, sect, moves) -> None:
 
         color, enemy_color = ('w', 'b') if self.white_to_move else ('b', 'w')
         pawn = Pawn(sect, color)
@@ -169,11 +175,11 @@ class Board:
             moves.append(Move((a, sect), (a, next_sect), self.board))
             # 2-space pawn move
             next_next_sect = (next_sect + pawn.dir) % SECTORS
-            if sect == pawn.start_sector and self.board[a][next_next_sect] == "--":
+            if (pawn.sector == pawn.start_sector) and self.board[a][next_next_sect] == "--":
                 moves.append(
                     Move((a, sect), (a, next_next_sect), self.board))
 
-        # captures
+        # Captures
         if a - 1 >= 0:
             if self.board[a - 1][next_sect][0] == enemy_color:
                 moves.append(Move((a, sect), (a - 1, next_sect), self.board))
@@ -181,7 +187,10 @@ class Board:
             if self.board[a + 1][next_sect][0] == enemy_color:
                 moves.append(Move((a, sect), (a + 1, next_sect), self.board))
 
-    def get_rook_moves(self, a, sect, moves):
+        # Promotions: TODO
+        return
+
+    def get_rook_moves(self, a, sect, moves) -> None:
         # Determine the color of the enemy based on the current player's turn
         enemy_color = 'b' if self.white_to_move else 'w'
 
@@ -227,7 +236,7 @@ class Board:
             # Check and add moves in the specified direction
             check(d, a, sect)
 
-    def get_bishop_moves(self, a, sect, moves):
+    def get_bishop_moves(self, a, sect, moves) -> None:
         # Determine the color of the enemy based on the current player's turn
         enemy_color = 'b' if self.white_to_move else 'w'
 
@@ -273,10 +282,11 @@ class Board:
             # Check and add moves in the specified diagonal direction
             check(d, a, sect)
 
-    def get_queen_moves(self, a, sect, moves):
+    def get_queen_moves(self, a, sect, moves) -> None:
         # Combine the moves of a bishop and a rook to get queen moves
         self.get_bishop_moves(a, sect, moves)
         self.get_rook_moves(a, sect, moves)
+        return
 
     def get_king_moves(self, a, sect, moves):
         # Determine the opponent's color based on the current player's turn
