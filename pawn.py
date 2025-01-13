@@ -5,9 +5,6 @@ RIGHT_WHITE = 1
 LEFT_BLACK = 2
 RIGHT_BLACK = 3
 
-PAWN_WHITE = 'w'
-PAWN_BLACK = 'b'
-
 start_sectors = {LEFT_WHITE: 13, RIGHT_WHITE: 10,
                  LEFT_BLACK: 2, RIGHT_BLACK: 5}
 end_sectors = {LEFT_WHITE: 3, RIGHT_WHITE: 4, LEFT_BLACK: 12, RIGHT_BLACK: 11}
@@ -29,12 +26,12 @@ class Pawn:
 
     def _get_pawn_dir(self):
         """Determine the movement direction of the pawn."""
-        direction = 1 if self.color == PAWN_WHITE else -1
+        direction = 1 if self.color == WHITE else -1
         return direction if self.on_left_half else -direction
 
     def _get_key(self):
         """Determine the key for start and end sector lookups."""
-        if self.color == PAWN_WHITE:
+        if self.color == WHITE:
             return LEFT_WHITE if self.on_left_half else RIGHT_WHITE
         else:
             return LEFT_BLACK if self.on_left_half else RIGHT_BLACK
@@ -50,5 +47,4 @@ class Pawn:
     def update_sector(self, new_sector):
         """Update the pawn's current sector and movement status."""
         self.sector = new_sector
-        self.has_moved = self._has_moved_fun()
         return

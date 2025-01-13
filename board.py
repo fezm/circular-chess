@@ -9,25 +9,25 @@ from constants import *
 class Board:
     def __init__(self):
         # Board is a 4x16 2D list, each entry has 2 characters:
-        # first character represents color: 'b' or 'w'
-        # second character represents type of piece: 'K', 'Q', 'R', 'B', 'N', 'p'
-        # "--" represents an empty square
+        # first character represents color: BLACK or WHITE
+        # second character represents type of piece: 'K', 'Q', 'R', BLACK, 'N', 'p'
+        # BLANK represents an empty square
         self.board = [
-            ["--", "--", "bp", "bQ", "bK", "bp", "--", "--",
-             "--", "--", "wp", "wK", "wQ", "wp", "--", "--"],
-            ["--", "--", "bp", "bB", "bB", "bp", "--", "--",
-             "--", "--", "wp", "wB", "wB", "wp", "--", "--"],
-            ["--", "--", "bp", "bN", "bN", "bp", "--", "--",
-             "--", "--", "wp", "wN", "wN", "wp", "--", "--"],
-            ["--", "--", "bp", "bR", "bR", "bp", "--", "--",
-             "--", "--", "wp", "wR", "wR", "wp", "--", "--"]
+            [BLANK, BLANK, PAWN_B, QUEEN_B, KING_B, PAWN_B, BLANK, BLANK,
+             BLANK, BLANK, PAWN_W, KING_W, QUEEN_W, PAWN_W, BLANK, BLANK],
+            [BLANK, BLANK, PAWN_B, BISHOP_B, BISHOP_B, PAWN_B, BLANK, BLANK,
+             BLANK, BLANK, PAWN_W, BISHOP_W, BISHOP_W, PAWN_W, BLANK, BLANK],
+            [BLANK, BLANK, PAWN_B, KNIGHT_B, KNIGHT_B, PAWN_B, BLANK, BLANK,
+             BLANK, BLANK, PAWN_W, KNIGHT_W, KNIGHT_W, PAWN_W, BLANK, BLANK],
+            [BLANK, BLANK, PAWN_B, ROOK_B, ROOK_B, PAWN_B, BLANK, BLANK,
+             BLANK, BLANK, PAWN_W, ROOK_W, ROOK_W, PAWN_W, BLANK, BLANK]
         ]
-        self.move_functions = {'p': self.get_pawn_moves,
-                               'R': self.get_rook_moves,
-                               'B': self.get_bishop_moves,
-                               'N': self.get_knight_moves,
-                               'Q': self.get_queen_moves,
-                               'K': self.get_king_moves}
+        self.move_functions = {PAWN: self.get_pawn_moves,
+                               ROOK: self.get_rook_moves,
+                               BISHOP: self.get_bishop_moves,
+                               KNIGHT: self.get_knight_moves,
+                               QUEEN: self.get_queen_moves,
+                               KING: self.get_king_moves}
 
         self.white_to_move = True
 
@@ -35,14 +35,14 @@ class Board:
 
     def reset(self):
         self.board = [
-            ["--", "--", "bp", "bQ", "bK", "bp", "--", "--",
-             "--", "--", "wp", "wK", "wQ", "wp", "--", "--"],
-            ["--", "--", "bp", "bB", "bB", "bp", "--", "--",
-             "--", "--", "wp", "wB", "wB", "wp", "--", "--"],
-            ["--", "--", "bp", "bN", "bN", "bp", "--", "--",
-             "--", "--", "wp", "wN", "wN", "wp", "--", "--"],
-            ["--", "--", "bp", "bR", "bR", "bp", "--", "--",
-             "--", "--", "wp", "wR", "wR", "wp", "--", "--"]
+            [BLANK, BLANK, PAWN_B, QUEEN_B, KING_B, PAWN_B, BLANK, BLANK,
+             BLANK, BLANK, PAWN_W, KING_W, QUEEN_W, PAWN_W, BLANK, BLANK],
+            [BLANK, BLANK, PAWN_B, BISHOP_B, BISHOP_B, PAWN_B, BLANK, BLANK,
+             BLANK, BLANK, PAWN_W, BISHOP_W, BISHOP_W, PAWN_W, BLANK, BLANK],
+            [BLANK, BLANK, PAWN_B, KNIGHT_B, KNIGHT_B, PAWN_B, BLANK, BLANK,
+             BLANK, BLANK, PAWN_W, KNIGHT_W, KNIGHT_W, PAWN_W, BLANK, BLANK],
+            [BLANK, BLANK, PAWN_B, ROOK_B, ROOK_B, PAWN_B, BLANK, BLANK,
+             BLANK, BLANK, PAWN_W, ROOK_W, ROOK_W, PAWN_W, BLANK, BLANK]
         ]
         self.move_log = []
         self.white_to_move = True
@@ -94,7 +94,7 @@ class Board:
                 piece = self.board[a][sect]
 
                 # Check if the square is not empty
-                if piece != "--":
+                if piece != BLANK:
                     # Calculate the angle based on the sector
                     theta = theta0 + (SLICE * sect)
 
@@ -128,7 +128,7 @@ class Board:
 
     def make_move(self, move: Move) -> None:
         # Makes a move on the board and updates the game state
-        self.board[move.start_ann][move.start_sect] = "--"
+        self.board[move.start_ann][move.start_sect] = BLANK
         self.board[move.end_ann][move.end_sect] = move.piece_moved
         self.move_log.append(move)
         self.white_to_move = not self.white_to_move
@@ -156,8 +156,8 @@ class Board:
         for a in range(ANNULI):
             for sect in range(SECTORS):
                 turn = self.board[a][sect][0]
-                if (turn == 'w' and self.white_to_move) or \
-                        (turn == 'b' and not self.white_to_move):
+                if (turn == WHITE and self.white_to_move) or \
+                        (turn == BLACK and not self.white_to_move):
                     piece = self.board[a][sect][1]
                     # Calls appropriate move function based on piece type
                     self.move_functions[piece](a, sect, moves)
@@ -166,16 +166,17 @@ class Board:
 
     def get_pawn_moves(self, a, sect, moves) -> None:
 
-        color, enemy_color = ('w', 'b') if self.white_to_move else ('b', 'w')
+        color, enemy_color = (
+            WHITE, BLACK) if self.white_to_move else (BLACK, WHITE)
         pawn = Pawn(sect, color)
         next_sect = (sect + pawn.dir) % SECTORS
 
         # 1-space pawn move
-        if self.board[a][next_sect] == "--":
+        if self.board[a][next_sect] == BLANK:
             moves.append(Move((a, sect), (a, next_sect), self.board))
             # 2-space pawn move
             next_next_sect = (next_sect + pawn.dir) % SECTORS
-            if (pawn.sector == pawn.start_sector) and self.board[a][next_next_sect] == "--":
+            if (pawn.sector == pawn.start_sector) and self.board[a][next_next_sect] == BLANK:
                 moves.append(
                     Move((a, sect), (a, next_next_sect), self.board))
 
@@ -192,7 +193,7 @@ class Board:
 
     def get_rook_moves(self, a, sect, moves) -> None:
         # Determine the color of the enemy based on the current player's turn
-        enemy_color = 'b' if self.white_to_move else 'w'
+        enemy_color = BLACK if self.white_to_move else WHITE
 
         # Define possible movement directions for a rook
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
@@ -206,20 +207,14 @@ class Board:
 
             # Calculate the new coordinates based on the movement direction
             new_a = ann + direction[0]
-            new_sect = sec + direction[1]
-
-            # Handle wrap-around if the new sector goes beyond the board limits
-            if new_sect == -1:
-                new_sect = 15
-            elif new_sect == 16:
-                new_sect = 0
+            new_sect = (sec + direction[1]) % SECTORS
 
             # Check if the new coordinates are within the valid chess board range
             if not is_valid_space(new_a, new_sect):
                 return
 
             # If the target space is empty, add a regular move and recursively check further
-            if self.board[new_a][new_sect] == "--":
+            if self.board[new_a][new_sect] == BLANK:
                 moves.append(Move((a, sect), (new_a, new_sect), self.board))
                 check(direction, new_a, new_sect)
                 return
@@ -238,7 +233,7 @@ class Board:
 
     def get_bishop_moves(self, a, sect, moves) -> None:
         # Determine the color of the enemy based on the current player's turn
-        enemy_color = 'b' if self.white_to_move else 'w'
+        enemy_color = BLACK if self.white_to_move else WHITE
 
         # Define possible movement directions for a bishop
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
@@ -252,20 +247,14 @@ class Board:
 
             # Calculate the new coordinates based on the movement direction
             new_a = ann + direction[0]
-            new_sect = sec + direction[1]
-
-            # Handle wrap-around if the new sector goes beyond the board limits
-            if new_sect == -1:
-                new_sect = 15
-            elif new_sect == 16:
-                new_sect = 0
+            new_sect = (sec + direction[1]) % SECTORS
 
             # Check if the new coordinates are within the valid chess board range
             if not is_valid_space(new_a, new_sect):
                 return
 
             # If the target space is empty, add a regular move and recursively check further
-            if self.board[new_a][new_sect] == "--":
+            if self.board[new_a][new_sect] == BLANK:
                 moves.append(Move((a, sect), (new_a, new_sect), self.board))
                 check(direction, new_a, new_sect)
                 return
@@ -290,7 +279,7 @@ class Board:
 
     def get_king_moves(self, a, sect, moves):
         # Determine the opponent's color based on the current player's turn
-        enemy_color = 'b' if self.white_to_move else 'w'
+        enemy_color = BLACK if self.white_to_move else WHITE
 
         # Define possible directions for king movement
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1),
@@ -303,15 +292,11 @@ class Board:
         def check(direction, ann, sec):
             # Helper function to check and add valid king moves in a given direction
             new_a = ann + direction[0]
-            new_sect = sec + direction[1]
-            if new_sect == -1:
-                new_sect = 15
-            elif new_sect == 16:
-                new_sect = 0
+            new_sect = (sec + direction[1]) % SECTORS
             if not is_valid_space(new_a, new_sect):
                 return
 
-            if self.board[new_a][new_sect] == "--":
+            if self.board[new_a][new_sect] == BLANK:
                 # Empty space, valid king move
                 moves.append(Move((a, sect), (new_a, new_sect), self.board))
             elif self.board[new_a][new_sect][0] == enemy_color:
@@ -324,7 +309,7 @@ class Board:
 
     def get_knight_moves(self, a, sect, moves):
         # Determine the opponent's color based on the current player's turn
-        enemy_color = 'b' if self.white_to_move else 'w'
+        enemy_color = BLACK if self.white_to_move else WHITE
 
         # Define possible knight move directions
         directions = [(2, 1), (2, -1), (-2, 1), (-2, -1),
@@ -337,22 +322,12 @@ class Board:
         def check(direction, ann, sec):
             # Helper function to check and add valid knight moves in a given direction
             new_a = ann + direction[0]
-            new_sect = sec + direction[1]
-
-            # Adjust for circular board boundaries
-            if new_sect == -1:
-                new_sect = 15
-            elif new_sect == 16:
-                new_sect = 0
-            elif new_sect == -2:
-                new_sect = 14
-            elif new_sect == 17:
-                new_sect = 1
+            new_sect = (sec + direction[1]) % SECTORS
 
             if not is_valid_space(new_a, new_sect):
                 return
 
-            if self.board[new_a][new_sect] == "--":
+            if self.board[new_a][new_sect] == BLANK:
                 # Empty space, valid knight move
                 moves.append(Move((a, sect), (new_a, new_sect), self.board))
             elif self.board[new_a][new_sect][0] == enemy_color:
